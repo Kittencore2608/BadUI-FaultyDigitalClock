@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Broken digital clock</title>
+		<script>
+			function run() {
+				const field = document.getElementById('clock');
+				
+				// Last update timestamp
+				var lastTimestamp = -1;
+				// Display on clock
+				const initTime = currentTime();
+				var hour = initTime.hour;
+				var min = initTime.min;
+				var sec = initTime.sec;
+
+				function tick(timestamp) {
+					while (lastTimestamp == -1 || (timestamp - lastTimestamp) >= 1000) {
+						lastTimestamp += 1000;
+						// now draw
+						sec++;
+						if (sec == 100 || (sec > 0 && randNextInt(60) == 0)) {
+							// update minute
+							min++;
+							sec -= 60;
+							if (min == 100 || (min > 0 && randNextInt(60) == 0)) {
+								// update hour
+								hour++;
+								min -= 60;
+								if (hour == 24) {
+									hour -= 24;
+								}
+							}
+						}
+
+						field.innerHTML = timeString(hour,min,sec);
+					}
+					window.requestAnimationFrame(tick);
+				}
+
+				window.requestAnimationFrame(tick);
+			}
+
+			function timeString(hour,min,sec) {
+				// hours are special
+				var hour12 = hour % 12;
+				if (hour12 == 0) hour12 = 12; // 0 is 12, yay
+				var hs = twoDigitFmt(hour12);
+				var ms = twoDigitFmt(min);
+				var ss = twoDigitFmt(sec);
+				var ps = hour >= 12? 'PM' : 'AM';
+				return hs + ':' + ms + ':' + ss + ' ' + ps;
+			}
+
+			function twoDigitFmt(v) {
+				var neg = v < 0? '-' : '';
+				var num = Math.abs(v) < 10? ('0' + Math.abs(v)) : Math.abs(v);
+				return neg + num;
+			}
+
+			function currentTime() {
+				// 86400 seconds in a day
+				// 86400 000 millis in a day
+				const now = new Date();
+				const time = {};
+				// calculate absolutes
+				time.sec = now.getSeconds();
+				time.min = now.getMinutes();
+				time.hour = now.getHours(); // 0 to 23
+				return time;
+			}
+
+			function randNextInt(bound) {
+				return (Math.random() * bound) | 0;
+			}
+
+			// plain ol' lerp between a and b
+			function lerp(a,b,lerp) {
+				return (1 - lerp) * a + (lerp) * b;
+			}
+
+			// fractional part of a float
+			function frac(v) {
+				var integral = integral < 0? Math.ceil(v) : Math.floor(v);
+				return v - integral;
+			}
+
+			// Get the XY for a given radian angle plus distance
+			function radial(ang,dist) {
+				const resultx = CENTRE_X + Math.cos(ang) * dist;
+				const resulty = CENTRE_Y + Math.sin(ang) * dist;
+				return {x: resultx, y: resulty};
+			}
+		</script>
+	</head>
+	<body onload="run()" style="text-align:center">
+		<p id="clock" style="font:48px bold">sorry nothing</p>
+	</body>
+</html>
